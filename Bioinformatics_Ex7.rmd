@@ -8,7 +8,7 @@
 
 Objective: To identify differentially expressed genes in colorectal cancer using publicly available matched normal-cancer expression data.
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 library(TCGAbiolinks)
 library(SummarizedExperiment)
 library (readr)
@@ -23,7 +23,7 @@ library(DESeq2)
 
 Using TCGAbiolinks, RNA-seq gene expression quantification data (HTSeq raw counts) for 20 tumor and 20 normal samples from the TCGA Colorectal Adenocarcinoma (TCGA-COAD) project were downloaded.
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 query_Target <- GDCquery(project = "TCGA-COAD",
                          data.category = "Transcriptome Profiling",
                          experimental.strategy = "RNA-Seq",
@@ -31,27 +31,27 @@ query_Target <- GDCquery(project = "TCGA-COAD",
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 samplesDown_Target <- getResults(query_Target, cols = c("cases"))
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 data_Target_normal <- TCGAquery_SampleTypes(barcode = samplesDown_Target,
                                          typesample = "NT")
 ```
 
-```{r}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 data_Target_tumor <- TCGAquery_SampleTypes(barcode = samplesDown_Target,
                                          typesample = "TP")
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 data_short_Target_normal <- data_Target_normal[1:20]
 data_short_Target_tumor <- data_Target_tumor[1:20]
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 queryDown_Target_normal <- GDCquery(project = "TCGA-COAD",
                              data.category = "Transcriptome Profiling",
                              experimental.strategy = "RNA-Seq",
@@ -61,11 +61,11 @@ queryDown_Target_normal <- GDCquery(project = "TCGA-COAD",
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 GDCdownload(queryDown_Target_normal, directory = "./normal")
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 queryDown_Target_tumor <- GDCquery(project = "TCGA-COAD",
                              data.category = "Transcriptome Profiling",
                              experimental.strategy = "RNA-Seq",
@@ -75,7 +75,7 @@ queryDown_Target_tumor <- GDCquery(project = "TCGA-COAD",
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 GDCdownload(queryDown_Target_tumor, directory = "./tumor")
 ```
 
@@ -83,7 +83,7 @@ GDCdownload(queryDown_Target_tumor, directory = "./tumor")
 
 All downloaded TSV files were merged into a single data frame, with each sample annotated according to its group (Tumor or Control). The resulting table, containing genes as rows and samples as columns, is the required input format for DESeq2.
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 
 file_dir_norm <- "./normal/TCGA-COAD/Transcriptome_Profiling/Gene_Expression_Quantification"
 file_dir_tumor <- "./tumor/TCGA-COAD/Transcriptome_Profiling/Gene_Expression_Quantification"
@@ -91,7 +91,7 @@ file_dir_tumor <- "./tumor/TCGA-COAD/Transcriptome_Profiling/Gene_Expression_Qua
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 
 sample_files_norm <- list.files(file_dir_norm,
                         pattern = "\\.tsv$",
@@ -100,7 +100,7 @@ sample_files_norm <- list.files(file_dir_norm,
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 
 sample_files_tumor <- list.files(file_dir_tumor,
                         pattern = "\\.tsv$",
@@ -109,7 +109,7 @@ sample_files_tumor <- list.files(file_dir_tumor,
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 sample_names_norm <- data_short_Target_normal
 sample_names_tumor <- data_short_Target_tumor
 
@@ -124,7 +124,7 @@ labels <- c(
 )
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 process_tsv <- function(file, sample_name, label) {
   read_tsv(file, col_types = cols(), comment = "#") %>%
     select(gene_id, gene_name, unstranded) %>%
@@ -137,23 +137,23 @@ process_tsv <- function(file, sample_name, label) {
 }
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 sample_data <- Map(process_tsv, sample_files, sample_names, labels)
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 long_df <- bind_rows(sample_data)
 long_df
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 gene_map <- long_df %>%
   select(gene_id, gene_name) %>%
   distinct()
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 sample_df_T <- long_df %>%
   pivot_wider(
     id_cols = c(gene_id, gene_name), 
@@ -167,13 +167,21 @@ sample_df_T
 
 ### PCA plot
 
-We performed a Principal Component Analysis (PCA) to assess whether the Tumor and Normal samples cluster differently. Prior to PCA, the raw read counts were normalized using counts per million (CPM), which adjusts for sequencing depth. The CPM for each gene is calculated as:
+We performed a Principal Component Analysis (PCA) to assess whether the Tumor and Normal samples cluster differently. Prior to PCA, the raw read counts were normalized using counts per million (CPM), which adjusts for sequencing depth. The log CPM for each gene is calculated as:
+
+Let $r_{gi}$ be the number of reads mapped to gene $g$ in sample $i$, and let $R_{i}$ be the total number of mapped reads in sample $i$.
 
 $$
-\text{CPM} = \frac{\text{raw counts for a gene}}{\text{total counts in the sample}} \times 10^6
-$$\
+R_i = \sum_g r_{gi}
+$$
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+The corresponding log-CPM transformation is:
+
+$$
+y_{gi} = \log_2\left( \frac{r_{gi} + 0.5}{R_i + 1.0} \times 10^6 \right)
+$$
+
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 selected_data <- sample_df_T[, 2:ncol(sample_df_T)]
 counts <- data.frame(lapply(selected_data, as.numeric), check.names = FALSE)
 counts[is.na(counts)] <- 0
@@ -184,15 +192,21 @@ keep<- is.finite(depth) & depth > 0
 counts<- counts[, keep, drop = FALSE]
 depth <- depth[keep]
 
-cpm <- sweep(counts, 2, depth, "/") * 1e6
-log_cpm <- log2(cpm + 1)
+counts_offset <- counts + 0.5
+depth_offset  <- depth  + 1.0
+
+cpm_offset <- sweep(counts_offset, 2, depth_offset, "/") * 1e6
+log_cpm <- log2(cpm_offset)
+
+#cpm <- sweep(counts, 2, depth, "/") * 1e6
+#log_cpm <- log2(cpm + 1)
 
 X <- t(log_cpm)
 pca_result <- prcomp(X, center = TRUE, scale. = FALSE)
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 
 variance_explained <- (pca_result$sdev^2) / sum(pca_result$sdev^2) * 100
 
@@ -223,7 +237,7 @@ The PCA plot shows a clear separation between tumor (red) and normal (blue) samp
 
 ### DESeq2
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 groups <- factor(c(rep("Normal",20),rep("Tumor",20)))
 sample_df_de <- as.data.frame(sample_df_T)
 sample_df_de <- sample_df_de[ , -2]
@@ -238,11 +252,11 @@ sampleInfo
 
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 dds <- DESeqDataSetFromMatrix(countData = sample_df_de, colData = sampleInfo, design = ~ groups)
 ```
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 dds$groups = relevel(dds$groups,ref="Normal")
 dds <- DESeq(dds)
 res <- results(dds)
@@ -255,9 +269,9 @@ res_df
 
 The adjusted p-value (padj) is the p-value corrected for multiple testing using the Benjamini–Hochberg procedure, which controls the false discovery rate (FDR).
 
-We additionally filter out genes with a log₂ fold change of zero, as this indicates no difference in expression (neither upregulation nor downregulation) between the tumor and normal groups.
+We additionally filter out genes with a log2fold change of zero, as this indicates no difference in expression (neither upregulation nor downregulation) between the tumor and normal groups.
 
-```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE, eval=FALSE}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 resSig <- res[(!is.na(res$padj) & (res$padj < 0.050000) &(abs(res$log2FoldChange)> 0.000000)), ]
 
 resSig_df <- as.data.frame(resSig)
@@ -279,23 +293,27 @@ resSig_df
 
 ### Most Significantly Differentially expressed genes in tumor samples in terms of padj
 
-```{r}
+```{r echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 
-ggplot(resSig_df,
-  aes(x = log2FoldChange,
-      y = -log10(padj),
-      color = factor(
-      ifelse(padj < 0.05 & log2FoldChange > 1, "Up",
-      ifelse(padj < 0.05 & log2FoldChange < -1, "Down", "NS")),
-      levels = c("Up", "Down", "NS")))) +
-  geom_point() +
-  scale_color_manual(name = "Expression",
-                     values = c("Up" = "red", "Down" = "blue", "NS" = "grey")) +
+log2FC_cut <- 0
+padj_cut   <- 0.05
+
+ggplot(na.omit(res_df), aes(
+    x = log2FoldChange,
+    y = -log10(padj),
+    color = factor( ifelse(padj < padj_cut & log2FoldChange >=  log2FC_cut, "Up",
+                    ifelse(padj < padj_cut & log2FoldChange <= -log2FC_cut, "Down", "NS")),
+                    levels = c("Up", "Down", "NS")))) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  scale_color_manual(values = c(Up = "red", Down = "blue", NS = "grey")) +
+  labs(x = "log2 Fold Change",
+       y = "-log10 adjusted p-value",
+      color = "Expression") +
   theme_minimal()
 
 ```
 
-This volcano plot shows that many genes are significantly upregulated (red) or downregulated (blue) between the two groups (Tumor and Normal), indicating substantial differences in gene expression profiles. Genes in grey are not significantly different.
+The volcano plots shows that many genes are significantly upregulated (red) or downregulated (blue) between the two groups (Tumor and Normal), indicating substantial differences in gene expression profiles. Genes in grey are not significantly different. Note that the plot includes all genes, regardless of statistical significance
 
 ```{r}
 resSig_df_padj <- resSig_df[order(resSig_df$padj), c("gene_id", "gene_name", "padj")]
@@ -308,7 +326,7 @@ insert analysis for top significantly expressed (Do top 3 here)
 
 ### Upregulated and Downregulated Genes
 
-In a given comparison, a positive fold change denotes higher expression, whereas a negative value indicates lower expression. Fold change is typically expressed on a log₂ scale. For instance, a log2fold change of 1.5 in a Tumor vs Control comparison means the gene’s expression in Tumor Samples is approximately 2.82 times higher than in Control ($2^{1.5} \approx 2.82$).
+In a given comparison, a positive fold change denotes higher expression, whereas a negative value indicates lower expression. Fold change is typically expressed on a log2scale. For instance, a log2fold change of 1.5 in a Tumor vs Control comparison means the gene’s expression in Tumor Samples is approximately 2.82 times higher than in Control ($2^{1.5} \approx 2.82$).
 
 #### Top significantly upregulated genes in tumor samples in terms of log2FoldChange
 
